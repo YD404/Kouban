@@ -82,7 +82,7 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                         <th className="border border-black px-1 py-1 w-[6%]">S#</th>
                         <th className="border border-black px-1 py-1 w-[6%]">P</th>
                         <th className="border border-black px-1 py-1 w-[6%]">D/N</th>
-                        <th className="border border-black px-1 py-1 w-[39%]">内容</th>
+                        <th className="border border-black px-1 py-1 w-[39%]">SCENE</th>
                         {castMaster.map((cast) => (
                             <th key={cast.id} className="border border-black px-1 py-1 w-[6%] text-[10px]">
                                 {cast.role}
