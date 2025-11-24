@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# 香盤表ジェネレーター (Kouban Generator)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+撮影スケジュール（香盤表）を作成・管理・印刷するためのWebアプリケーションです。
+React + TypeScript + Tailwind CSS で構築されており、B5縦サイズの印刷レイアウトに最適化されています。
 
-Currently, two official plugins are available:
+## 特徴
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **直感的なエディタ**: アコーディオン形式のUIで、基本情報、スケジュール、フッター情報をスムーズに入力できます。
+*   **リアルタイムプレビュー**: 入力内容は即座に右側のプレビュー画面（印刷レイアウト）に反映されます。
+*   **複数日管理**: 1つのプロジェクトで複数の撮影日を管理でき、日付ごとのスケジュール作成が可能です。
+*   **自動入力補助**: 時間の自動計算や、前日の情報コピー機能により、入力の手間を削減します。
+*   **印刷最適化**: B5縦サイズに最適化されたレイアウトで、余白を最小限に抑え、情報を最大限に表示します。印刷時はヘッダーに背景色が付き、視認性が向上します。
+*   **データ保存**: プロジェクトデータをJSONファイルとして保存・読み込みができ、バックアップや共有が容易です。
 
-## React Compiler
+## 機能一覧
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. プロジェクト設定
+*   タイトル、組名の設定
+*   キャストマスタ登録（役名・キャスト名）
 
-## Expanding the ESLint configuration
+### 2. スケジュール編集
+*   **シーン行**: 時間、シーン番号(S#)、ページ数(P)、D/N、内容、キャスト選択
+*   **場所行**: 撮影場所の見出し追加
+*   **自動計算**: 終了時間の自動入力（前の行の終了時間から開始）
+*   **キャスト選択**: 登録したキャストをチェックボックスで簡単選択（EXは固定表示）
+*   **最終日設定**: 最終日メッセージの表示
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. フッター情報
+*   備考、車両、エキストラ情報の入力
+*   **入り時間・キャスト表**: 時間、場所、キャスト（役名付き）、備考の表作成
+*   連絡先（監督・助監督）の入力
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 4. その他
+*   **一括印刷**: 全日程をまとめて印刷プレビュー表示
+*   **日付削除**: 不要な日付の削除機能（確認ダイアログ付き）
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 技術スタック
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+*   [Vite](https://vitejs.dev/)
+*   [React](https://react.dev/)
+*   [TypeScript](https://www.typescriptlang.org/)
+*   [Tailwind CSS](https://tailwindcss.com/)
+*   [Google Fonts](https://fonts.google.com/) (Noto Sans JP)
+
+## 開発環境のセットアップ
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ライセンス
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+MIT
