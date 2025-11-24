@@ -29,19 +29,42 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
         </tr>
     );
 
+    // Helper to format footer cast name with newline
+    const formatFooterCast = (name: string) => {
+        if (!name) return '';
+        const parts = name.split(' (');
+        if (parts.length === 2) {
+            return (
+                <>
+                    {parts[0]}<br />
+                    ({parts[1]}
+                </>
+            );
+        }
+        return name;
+    };
+
+    const displayTitle = projectData.title.startsWith('「') && projectData.title.endsWith('」')
+        ? projectData.title
+        : `「${projectData.title}」`;
+
+    const displayGroupName = projectData.groupName
+        ? (projectData.groupName.endsWith('組') ? projectData.groupName : `${projectData.groupName}組`)
+        : '';
+
     return (
         <div className="print-container w-full max-w-[182mm] mx-auto bg-white text-black text-xs leading-tight">
             {/* Header */}
             <div className="mb-2 border-b-2 border-black pb-1 flex justify-between items-end">
                 <div>
                     <div className="flex items-end gap-4 mb-1">
-                        <h1 className="text-xl font-bold">{projectData.title}</h1>
-                        {projectData.groupName && <span className="text-lg font-bold">{projectData.groupName}</span>}
+                        <h1 className="text-xl font-bold">{displayTitle}</h1>
+                        {displayGroupName && <span className="text-lg font-bold">{displayGroupName}</span>}
                     </div>
                     <div className="flex gap-4 text-sm">
                         <div><span className="font-bold">日付:</span> {headerInfo.date}</div>
                         <div><span className="font-bold">集合場所:</span> {headerInfo.meetingPlace}</div>
-                        <div><span className="font-bold">集合時間:</span> {headerInfo.meetingTime}</div>
+                        <div><span className="font-bold">スタッフ集合時間:</span> {headerInfo.meetingTime}</div>
                     </div>
                 </div>
                 <div className="text-right">
@@ -62,7 +85,7 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                         <th className="border border-black px-1 py-1 w-[39%]">内容</th>
                         {castMaster.map((cast) => (
                             <th key={cast.id} className="border border-black px-1 py-1 w-[6%] text-[10px]">
-                                {cast.name}
+                                {cast.role}
                             </th>
                         ))}
                         {/* Empty Column Header */}
@@ -94,7 +117,7 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                                 <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.sceneNumber}</td>
                                 <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.pageNumber}</td>
                                 <td className="border border-black px-1 py-1 text-center">{row.dn}</td>
-                                <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-[10px]">
+                                <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top">
                                     {row.description}
                                 </td>
                                 {/* Cast Columns */}
@@ -160,9 +183,9 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                         <tr key={index}>
                             <td className="border border-black px-1 py-1 h-6 text-center">{row.time}</td>
                             <td className="border border-black px-1 py-1 h-6 text-center">{row.location}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[11%]">{row.cast1}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%]">{row.cast2}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%]">{row.cast3}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[11%] text-[10px] leading-tight">{formatFooterCast(row.cast1)}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%] text-[10px] leading-tight">{formatFooterCast(row.cast2)}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%] text-[10px] leading-tight">{formatFooterCast(row.cast3)}</td>
                             <td className="border border-black px-1 py-1 h-6 text-left">{row.remarks}</td>
                         </tr>
                     ))}
