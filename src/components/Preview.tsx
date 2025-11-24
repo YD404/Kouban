@@ -1,0 +1,187 @@
+import React from 'react';
+import type { ProjectData, DayData } from '../types.ts';
+
+interface PreviewProps {
+    projectData: ProjectData;
+    dayData: DayData;
+}
+
+const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
+    const { headerInfo, scheduleRows, footerInfo } = dayData;
+    const { castMaster } = projectData;
+
+    // Helper to render empty row
+    const renderEmptyRow = (key: string) => (
+        <tr key={key} className="h-12">
+            <td className="border border-black px-1 py-1"></td>
+            <td className="border border-black px-1 py-1"></td>
+            <td className="border border-black px-1 py-1"></td>
+            <td className="border border-black px-1 py-1"></td>
+            <td className="border border-black px-1 py-1"></td>
+            {/* Cast Columns */}
+            {castMaster.map((cast) => (
+                <td key={cast.id} className="border border-black px-1 py-1"></td>
+            ))}
+            {/* Empty Column between Cast and EX */}
+            <td className="border border-black px-1 py-1 bg-gray-100 print:bg-white w-2"></td>
+            {/* EX Column */}
+            <td className="border border-black px-1 py-1"></td>
+        </tr>
+    );
+
+    return (
+        <div className="print-container w-full max-w-[182mm] mx-auto bg-white text-black text-xs leading-tight">
+            {/* Header */}
+            <div className="mb-2 border-b-2 border-black pb-1 flex justify-between items-end">
+                <div>
+                    <div className="flex items-end gap-4 mb-1">
+                        <h1 className="text-xl font-bold">{projectData.title}</h1>
+                        {projectData.groupName && <span className="text-lg font-bold">{projectData.groupName}</span>}
+                    </div>
+                    <div className="flex gap-4 text-sm">
+                        <div><span className="font-bold">日付:</span> {headerInfo.date}</div>
+                        <div><span className="font-bold">集合場所:</span> {headerInfo.meetingPlace}</div>
+                        <div><span className="font-bold">集合時間:</span> {headerInfo.meetingTime}</div>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <div className="text-lg font-bold border border-black px-2 py-1 min-w-[80px] text-center">
+                        {headerInfo.versionType === 'decision' ? '決定稿' : `仮${headerInfo.versionNumber}`}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Schedule Table */}
+            <table className="w-full border-collapse border border-black mb-2 table-fixed">
+                <thead>
+                    <tr className="bg-gray-100 print:bg-gray-200 text-center">
+                        <th className="border border-black px-1 py-1 w-[12%]">Time</th>
+                        <th className="border border-black px-1 py-1 w-[6%]">S#</th>
+                        <th className="border border-black px-1 py-1 w-[6%]">P</th>
+                        <th className="border border-black px-1 py-1 w-[6%]">D/N</th>
+                        <th className="border border-black px-1 py-1 w-[39%]">内容</th>
+                        {castMaster.map((cast) => (
+                            <th key={cast.id} className="border border-black px-1 py-1 w-[6%] text-[10px]">
+                                {cast.name}
+                            </th>
+                        ))}
+                        {/* Empty Column Header */}
+                        <th className="border border-black px-1 py-1 w-2 bg-gray-100 print:bg-gray-200"></th>
+                        <th className="border border-black px-1 py-1 w-[6%] text-[10px]">EX</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {/* Always show empty row at top */}
+                    {renderEmptyRow('top-empty')}
+
+                    {scheduleRows.map((row) => {
+                        if (row.type === 'location') {
+                            return (
+                                <tr key={row.id} className="bg-gray-200 print:bg-gray-200 font-bold">
+                                    <td colSpan={6 + castMaster.length + 2} className="border border-black px-2 py-1 text-left">
+                                        現場：{row.location}
+                                    </td>
+                                </tr>
+                            );
+                        }
+
+                        // Scene Row (Single row layout)
+                        return (
+                            <tr key={row.id}>
+                                <td className="border border-black px-1 py-1 text-center h-8 font-bold">
+                                    {row.startTime} - {row.endTime}
+                                </td>
+                                <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.sceneNumber}</td>
+                                <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.pageNumber}</td>
+                                <td className="border border-black px-1 py-1 text-center">{row.dn}</td>
+                                <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-[10px]">
+                                    {row.description}
+                                </td>
+                                {/* Cast Columns */}
+                                {castMaster.map((cast) => (
+                                    <td key={cast.id} className="border border-black px-1 py-1 text-center text-lg align-middle">
+                                        {row.castIds.includes(cast.id) ? '○' : ''}
+                                    </td>
+                                ))}
+                                {/* Empty Column */}
+                                <td className="border border-black px-1 py-1 bg-gray-100 print:bg-white w-2"></td>
+                                {/* EX Column */}
+                                <td className="border border-black px-1 py-1 text-center text-lg align-middle">
+                                    {row.castIds.includes('EX') ? '○' : ''}
+                                </td>
+                            </tr>
+                        );
+                    })}
+
+                    {/* Last Day Message */}
+                    {dayData.isLastDay && dayData.lastDayMessage && (
+                        <tr>
+                            <td colSpan={6 + castMaster.length + 2} className="border border-black px-2 py-4 text-center font-bold text-lg">
+                                {dayData.lastDayMessage}
+                            </td>
+                        </tr>
+                    )}
+
+                    {/* Always show empty row at bottom */}
+                    {renderEmptyRow('bottom-empty')}
+                </tbody>
+            </table>
+
+            {/* Footer Section A: 3 Columns Info */}
+            <table className="w-full border-collapse border border-black mb-2 table-fixed">
+                <thead>
+                    <tr className="bg-gray-100 print:bg-gray-200 text-center text-xs">
+                        <th className="border border-black px-1 py-1 w-1/3">備考</th>
+                        <th className="border border-black px-1 py-1 w-1/3">車両 等</th>
+                        <th className="border border-black px-1 py-1 w-1/3">エキストラ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td className="border border-black px-2 py-1 h-24 align-top whitespace-pre-wrap">{footerInfo.remarks}</td>
+                        <td className="border border-black px-2 py-1 h-24 align-top whitespace-pre-wrap">{footerInfo.vehicles}</td>
+                        <td className="border border-black px-2 py-1 h-24 align-top whitespace-pre-wrap">{footerInfo.extras}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {/* Footer Section B: Time Table */}
+            <table className="w-full border-collapse border border-black mb-2 table-fixed">
+                <thead>
+                    <tr className="bg-gray-100 print:bg-gray-200 text-center text-xs">
+                        <th className="border border-black px-1 py-1 w-[15%]">入り時間</th>
+                        <th className="border border-black px-1 py-1 w-[25%]">場所</th>
+                        <th colSpan={3} className="border border-black px-1 py-1 w-[35%]">出演者 (敬称略)</th>
+                        <th className="border border-black px-1 py-1 w-[25%]">備考</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {footerInfo.timeTable.map((row, index) => (
+                        <tr key={index}>
+                            <td className="border border-black px-1 py-1 h-6 text-center">{row.time}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center">{row.location}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[11%]">{row.cast1}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%]">{row.cast2}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%]">{row.cast3}</td>
+                            <td className="border border-black px-1 py-1 h-6 text-left">{row.remarks}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            {/* Footer Section C: Contacts */}
+            <div className="border-t-2 border-black pt-1 flex justify-start gap-8 text-xs">
+                <div>
+                    <span className="font-bold mr-2">監督:</span>
+                    {footerInfo.directorContact.name} <span className="ml-2">{footerInfo.directorContact.phone}</span>
+                </div>
+                <div>
+                    <span className="font-bold mr-2">助監督:</span>
+                    {footerInfo.assistantDirectorContact.name} <span className="ml-2">{footerInfo.assistantDirectorContact.phone}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Preview;

@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  @page {
+    size: B5 portrait;
+    margin: 5mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.print-page-break {
+  page-break-after: always;
+}
