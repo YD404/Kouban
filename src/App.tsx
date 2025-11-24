@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ProjectData, DayData, ScheduleHeader, FooterInfo, CastMaster } from './types.ts';
+import type { ProjectData, DayData, ScheduleHeader, FooterInfo } from './types.ts';
 import Editor from './components/Editor.tsx';
 import Preview from './components/Preview.tsx';
 
@@ -109,16 +109,7 @@ function App() {
 
   const currentDay = projectData.days.find(d => d.id === currentDayId) || projectData.days[0];
 
-  const updateProject = (newData: Partial<ProjectData>) => {
-    setProjectData(prev => ({ ...prev, ...newData }));
-  };
 
-  const updateCurrentDay = (newData: Partial<DayData>) => {
-    setProjectData(prev => ({
-      ...prev,
-      days: prev.days.map(day => day.id === currentDayId ? { ...day, ...newData } : day)
-    }));
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
