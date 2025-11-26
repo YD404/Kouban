@@ -12,7 +12,7 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
 
     // Helper to render empty row
     const renderEmptyRow = (key: string) => (
-        <tr key={key} className="h-12">
+        <tr key={key} className="h-6">
             <td className="border border-black px-1 py-1"></td>
             <td className="border border-black px-1 py-1"></td>
             <td className="border border-black px-1 py-1"></td>
@@ -193,16 +193,20 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {footerInfo.timeTable.map((row, index) => (
-                        <tr key={index}>
-                            <td className="border border-black px-1 py-1 h-6 text-center">{row.time}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center">{row.location}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[11%] text-[10px] leading-tight">{formatFooterCast(row.cast1)}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%] text-[10px] leading-tight">{formatFooterCast(row.cast2)}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-center w-[12%] text-[10px] leading-tight">{formatFooterCast(row.cast3)}</td>
-                            <td className="border border-black px-1 py-1 h-6 text-left">{row.remarks}</td>
-                        </tr>
-                    ))}
+                    {footerInfo.timeTable.map((row, index) => {
+                        const heightClass = row.time ? 'h-6' : 'h-3';
+                        const paddingClass = row.time ? 'py-1' : 'py-0';
+                        return (
+                            <tr key={index}>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center`}>{row.time}</td>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center`}>{row.location}</td>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[11%] text-[10px] leading-tight`}>{formatFooterCast(row.cast1)}</td>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[12%] text-[10px] leading-tight`}>{formatFooterCast(row.cast2)}</td>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[12%] text-[10px] leading-tight`}>{formatFooterCast(row.cast3)}</td>
+                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-left`}>{row.remarks}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
 
@@ -210,11 +214,11 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
             <div className="border-t-2 border-black pt-1 flex justify-start gap-8 text-xs">
                 <div>
                     <span className="font-bold mr-2">監督:</span>
-                    {footerInfo.directorContact.name} <span className="ml-2">{footerInfo.directorContact.phone}</span>
+                    {footerInfo.directorContact.name} <span className="ml-2 text-sm font-bold">{footerInfo.directorContact.phone}</span>
                 </div>
                 <div>
                     <span className="font-bold mr-2">助監督:</span>
-                    {footerInfo.assistantDirectorContact.name} <span className="ml-2">{footerInfo.assistantDirectorContact.phone}</span>
+                    {footerInfo.assistantDirectorContact.name} <span className="ml-2 text-sm font-bold">{footerInfo.assistantDirectorContact.phone}</span>
                 </div>
             </div>
         </div>
