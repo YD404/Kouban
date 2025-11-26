@@ -254,7 +254,7 @@ const Editor: React.FC<EditorProps> = ({
                         key={day.id}
                         onClick={() => handleDaySelect(day.id)}
                         className={`flex items-center px-4 py-2 rounded whitespace-nowrap cursor-pointer ${day.id === currentDayId
-                            ? 'bg-blue-600 text-white font-bold'
+                            ? 'bg-[#8c1822] text-white font-bold'
                             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                             }`}
                     >
@@ -263,7 +263,7 @@ const Editor: React.FC<EditorProps> = ({
                             <button
                                 onClick={(e) => handleDeleteDay(day.id, e)}
                                 className={`ml-2 w-5 h-5 flex items-center justify-center rounded-full ${day.id === currentDayId
-                                    ? 'bg-blue-500 hover:bg-blue-400 text-white'
+                                    ? 'bg-[#a63a44] hover:bg-[#d94552] text-white'
                                     : 'bg-gray-300 hover:bg-gray-400 text-gray-600'
                                     }`}
                                 title="削除"
@@ -275,7 +275,7 @@ const Editor: React.FC<EditorProps> = ({
                 ))}
                 <button
                     onClick={handleAddDay}
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded whitespace-nowrap font-bold"
+                    className="px-4 py-2 bg-[#32353d] hover:bg-[#1f2126] text-white rounded whitespace-nowrap font-bold"
                 >
                     + 日付追加
                 </button>

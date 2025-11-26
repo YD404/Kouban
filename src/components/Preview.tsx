@@ -63,7 +63,21 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                     </div>
                     <div className="flex gap-4 text-sm">
                         <div><span className="font-bold">日付:</span> {headerInfo.date}</div>
-                        <div><span className="font-bold">集合場所:</span> {headerInfo.meetingPlace}</div>
+                        <div>
+                            <span className="font-bold">集合場所:</span>{' '}
+                            {headerInfo.meetingPlace ? (
+                                <a
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(headerInfo.meetingPlace)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline hover:text-blue-800"
+                                >
+                                    {headerInfo.meetingPlace}
+                                </a>
+                            ) : (
+                                ''
+                            )}
+                        </div>
                         <div><span className="font-bold">スタッフ集合時間:</span> {headerInfo.meetingTime}</div>
                     </div>
                 </div>
