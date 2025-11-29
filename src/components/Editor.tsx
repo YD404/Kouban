@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ProjectData, DayData, SceneRow, LocationRow, CastMaster, ContactInfo } from '../types.ts';
+import type { ProjectData, DayData, SceneRow, LocationRow, BreakRow, CastMaster, ContactInfo } from '../types.ts';
 
 interface EditorProps {
     projectData: ProjectData;
@@ -135,6 +135,47 @@ const Editor: React.FC<EditorProps> = ({
         }));
     };
 
+    const addBreakRow = () => {
+        const lastRow = currentDay.scheduleRows[currentDay.scheduleRows.length - 1];
+        let initialStartTime = '';
+
+        if (lastRow) {
+            if (lastRow.type === 'scene' || lastRow.type === 'break') {
+                initialStartTime = lastRow.endTime;
+            }
+        } else if (currentDay.headerInfo.meetingTime) {
+            const [h, m] = currentDay.headerInfo.meetingTime.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) {
+                const date = new Date();
+                date.setHours(h + 1, m);
+                initialStartTime = date.toTimeString().slice(0, 5);
+            }
+        }
+
+        let initialEndTime = '';
+        if (initialStartTime) {
+            const [h, m] = initialStartTime.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) {
+                const date = new Date();
+                date.setHours(h + 1, m);
+                initialEndTime = date.toTimeString().slice(0, 5);
+            }
+        }
+
+        const newRow: BreakRow = {
+            id: crypto.randomUUID(),
+            type: 'break',
+            startTime: initialStartTime,
+            endTime: initialEndTime,
+            selectedOptions: [],
+            otherText: '',
+        };
+        updateCurrentDay(day => ({
+            ...day,
+            scheduleRows: [...day.scheduleRows, newRow]
+        }));
+    };
+
     const addLocationRow = () => {
         const newRow: LocationRow = {
             id: crypto.randomUUID(),
@@ -147,16 +188,31 @@ const Editor: React.FC<EditorProps> = ({
         }));
     };
 
-    const handleRowChange = (id: string, field: keyof SceneRow | keyof LocationRow, value: any) => {
+    const handleRowChange = (id: string, field: keyof SceneRow | keyof LocationRow | keyof BreakRow, value: any) => {
         updateCurrentDay(day => ({
             ...day,
             scheduleRows: day.scheduleRows.map((row) => {
                 if (row.id !== id) return row;
                 if (row.type === 'scene') {
                     return { ...row, [field]: value };
+                } else if (row.type === 'break') {
+                    return { ...row, [field]: value };
                 } else {
                     return { ...row, [field]: value };
                 }
+            })
+        }));
+    };
+
+    const handleBreakOptionChange = (rowId: string, option: string) => {
+        updateCurrentDay(day => ({
+            ...day,
+            scheduleRows: day.scheduleRows.map((row) => {
+                if (row.id !== rowId || row.type !== 'break') return row;
+                const newOptions = row.selectedOptions.includes(option)
+                    ? row.selectedOptions.filter((o) => o !== option)
+                    : [...row.selectedOptions, option];
+                return { ...row, selectedOptions: newOptions };
             })
         }));
     };
@@ -454,6 +510,104 @@ const Editor: React.FC<EditorProps> = ({
                                                 placeholder="ロケ地名を入力"
                                             />
                                         </div>
+                                    ) : row.type === 'break' ? (
+                                        <div className="grid grid-cols-12 gap-4 mt-10">
+                                            <div className="col-span-12 sm:col-span-4">
+                                                <label className="block text-sm font-bold mb-2">時間</label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="time"
+                                                        value={row.startTime}
+                                                        onChange={(e) => handleRowChange(row.id, 'startTime', e.target.value)}
+                                                        className="w-full border p-3 rounded text-base"
+                                                    />
+                                                    <span>-</span>
+                                                    <input
+                                                        type="time"
+                                                        value={row.endTime}
+                                                        onChange={(e) => handleRowChange(row.id, 'endTime', e.target.value)}
+                                                        className="w-full border p-3 rounded text-base"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-span-12">
+                                                <label className="block text-sm font-bold mb-2">SCENE (移動・休憩・撤収)</label>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {/* Meal Option Group */}
+                                                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border cursor-pointer hover:bg-green-50">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={['朝飯', '昼飯', '夕飯', '夜飯'].some(m => row.selectedOptions.includes(m))}
+                                                            onChange={() => {
+                                                                const currentMeal = ['朝飯', '昼飯', '夕飯', '夜飯'].find(m => row.selectedOptions.includes(m));
+                                                                if (currentMeal) {
+                                                                    // Uncheck: remove all meal options
+                                                                    const newOptions = row.selectedOptions.filter(o => !['朝飯', '昼飯', '夕飯', '夜飯'].includes(o));
+                                                                    handleRowChange(row.id, 'selectedOptions', newOptions);
+                                                                } else {
+                                                                    // Check: add default meal (e.g., 昼飯)
+                                                                    const newOptions = [...row.selectedOptions, '昼飯'];
+                                                                    handleRowChange(row.id, 'selectedOptions', newOptions);
+                                                                }
+                                                            }}
+                                                            className="w-5 h-5"
+                                                        />
+                                                        <span className="text-base">飯</span>
+                                                        {['朝飯', '昼飯', '夕飯', '夜飯'].some(m => row.selectedOptions.includes(m)) && (
+                                                            <select
+                                                                value={['朝飯', '昼飯', '夕飯', '夜飯'].find(m => row.selectedOptions.includes(m)) || '昼飯'}
+                                                                onChange={(e) => {
+                                                                    const newMeal = e.target.value;
+                                                                    const newOptions = row.selectedOptions.filter(o => !['朝飯', '昼飯', '夕飯', '夜飯'].includes(o));
+                                                                    newOptions.push(newMeal);
+                                                                    handleRowChange(row.id, 'selectedOptions', newOptions);
+                                                                }}
+                                                                className="ml-2 border rounded p-1 text-sm"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {['朝飯', '昼飯', '夕飯', '夜飯'].map(m => (
+                                                                    <option key={m} value={m}>{m}</option>
+                                                                ))}
+                                                            </select>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Other Options */}
+                                                    {['移動', '休憩', '完全撤収', '他'].map((option) => (
+                                                        <label key={option} className="flex items-center gap-2 bg-white px-3 py-2 rounded border cursor-pointer hover:bg-green-50">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={row.selectedOptions.includes(option)}
+                                                                onChange={() => handleBreakOptionChange(row.id, option)}
+                                                                className="w-5 h-5"
+                                                            />
+                                                            <span className="text-base">{option}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                                {row.selectedOptions.includes('他') && (
+                                                    <div className="mt-2">
+                                                        <input
+                                                            type="text"
+                                                            value={row.otherText}
+                                                            onChange={(e) => handleRowChange(row.id, 'otherText', e.target.value)}
+                                                            className="w-full border p-3 rounded text-base"
+                                                            placeholder="その他の内容を入力"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="mt-4">
+                                                    <label className="block text-sm font-bold mb-2">備考</label>
+                                                    <input
+                                                        type="text"
+                                                        value={row.remarks || ''}
+                                                        onChange={(e) => handleRowChange(row.id, 'remarks', e.target.value)}
+                                                        className="w-full border p-3 rounded text-base"
+                                                        placeholder="備考を入力"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     ) : (
                                         <div className="grid grid-cols-12 gap-4 mt-10">
                                             <div className="col-span-12 sm:col-span-4">
@@ -504,6 +658,7 @@ const Editor: React.FC<EditorProps> = ({
                                                     <option value="D">D</option>
                                                     <option value="N">N</option>
                                                     <option value="E">E</option>
+                                                    <option value="M">M</option>
                                                 </select>
                                             </div>
                                             <div className="col-span-12">
@@ -512,6 +667,16 @@ const Editor: React.FC<EditorProps> = ({
                                                     value={row.description}
                                                     onChange={(e) => handleRowChange(row.id, 'description', e.target.value)}
                                                     className="w-full border p-3 rounded text-base h-24"
+                                                />
+                                            </div>
+                                            <div className="col-span-12">
+                                                <label className="block text-sm font-bold mb-2">備考</label>
+                                                <input
+                                                    type="text"
+                                                    value={row.remarks || ''}
+                                                    onChange={(e) => handleRowChange(row.id, 'remarks', e.target.value)}
+                                                    className="w-full border p-3 rounded text-base"
+                                                    placeholder="備考を入力"
                                                 />
                                             </div>
                                             <div className="col-span-12">
@@ -549,13 +714,19 @@ const Editor: React.FC<EditorProps> = ({
                                 onClick={addSceneRow}
                                 className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 font-bold text-base"
                             >
-                                + 行を追加
+                                +撮影
+                            </button>
+                            <button
+                                onClick={addBreakRow}
+                                className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-bold text-base"
+                            >
+                                +飯/移動/撤収
                             </button>
                             <button
                                 onClick={addLocationRow}
                                 className="w-full bg-gray-500 text-white py-3 rounded hover:bg-gray-600 font-bold text-base"
                             >
-                                + 場所を追加
+                                +場所
                             </button>
                         </div>
 

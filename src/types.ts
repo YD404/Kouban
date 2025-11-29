@@ -7,7 +7,7 @@ export interface CastMaster {
 // 共通のプロパティ
 interface BaseRow {
   id: string;
-  type: 'scene' | 'location';
+  type: 'scene' | 'location' | 'break';
 }
 
 // シーン行
@@ -17,8 +17,9 @@ export interface SceneRow extends BaseRow {
   endTime: string;   // HH:mm
   sceneNumber: string; // NumberInput (step 0.1) -> string
   pageNumber: string;  // NumberInput (step 0.1) -> string
-  dn: 'D' | 'N' | 'E';
+  dn: 'D' | 'N' | 'E' | 'M';
   description: string;
+  remarks?: string; // 備考
   castIds: string[]; // チェックされたCastMasterのIDリスト
 }
 
@@ -28,12 +29,19 @@ export interface LocationRow extends BaseRow {
   location: string;
 }
 
-export type ScheduleRow = SceneRow | LocationRow;
+// 移動・休憩・撤収行
+export interface BreakRow extends BaseRow {
+  type: 'break';
+  startTime: string;
+  endTime: string;
+  selectedOptions: string[]; // 選択されたオプション (朝飯, 昼飯, etc.)
+  otherText: string; // 「他」の入力テキスト
+  remarks?: string; // 備考
+}
+
+export type ScheduleRow = SceneRow | LocationRow | BreakRow;
 
 export interface ScheduleHeader {
-  // titleはProjectDataに移動したが、互換性のため残すか、DayDataには不要か検討。
-  // 要件: "タイトルとキャスト登録は最初に編集したものを引きついて" -> ProjectDataで管理
-  // Date, Meeting Info, VersionはDayごとに異なる
   date: string; // YYYY-MM-DD
   meetingPlace: string;
   meetingTime: string; // HH:mm
