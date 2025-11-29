@@ -53,6 +53,18 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
         ? (projectData.groupName.endsWith('組') ? projectData.groupName : `${projectData.groupName}組`)
         : '';
 
+    // Calculate dynamic column widths
+    const fixedWidth = 12 + 6 + 4 + 4 + 2 + 4; // Time(12) + S#(6) + P(4) + D/N(4) + Spacer(2) + EX(4)
+    const castWidthPerCol = 5;
+    const totalCastWidth = castMaster.length * castWidthPerCol;
+    const availableWidth = 100 - fixedWidth - totalCastWidth;
+
+    // Distribute available width between SCENE and Remarks (approx 24:15 ratio)
+    const sceneRatio = 24 / 39;
+
+    const sceneWidth = Math.max(10, Math.floor(availableWidth * sceneRatio)); // Min 10%
+    const remarksWidth = Math.max(5, availableWidth - sceneWidth); // Remaining width
+
     return (
         <div className="print-container w-full max-w-[182mm] mx-auto bg-white text-black text-xs leading-tight">
             {/* Header */}
@@ -97,10 +109,10 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                         <th className="border border-black px-1 py-1 w-[6%]">S#</th>
                         <th className="border border-black px-1 py-1 w-[4%]">P</th>
                         <th className="border border-black px-1 py-1 w-[4%]">D/N</th>
-                        <th className="border border-black px-1 py-1 w-[24%]">SCENE</th>
-                        <th className="border border-black px-1 py-1 w-[15%]">備考</th>
+                        <th className="border border-black px-1 py-1" style={{ width: `${sceneWidth}%` }}>SCENE</th>
+                        <th className="border border-black px-1 py-1" style={{ width: `${remarksWidth}%` }}>備考</th>
                         {castMaster.map((cast) => (
-                            <th key={cast.id} className="border border-black px-1 py-1 w-[4%] text-[10px]">
+                            <th key={cast.id} className="border border-black px-1 py-1 text-[10px]" style={{ width: `${castWidthPerCol}%` }}>
                                 {cast.role}
                             </th>
                         ))}
