@@ -111,6 +111,13 @@ function App() {
 
 
 
+  const handleInitialize = () => {
+    if (window.confirm('本当に初期化しますか？\n入力したデータはすべて消去されます。')) {
+      setProjectData(defaultProjectData);
+      setCurrentDayId(defaultProjectData.days[0].id);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
       <div className="container mx-auto p-4 flex flex-col gap-4">
@@ -148,7 +155,13 @@ function App() {
               onClick={handlePrint}
               className="bg-[#32353d] hover:bg-[#1f2126] text-white font-bold py-2 px-4 rounded shadow transition"
             >
-              印刷 / PDF保存
+              印刷 / PDF
+            </button>
+            <button
+              onClick={handleInitialize}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition"
+            >
+              初期化
             </button>
           </div>
         </div>
