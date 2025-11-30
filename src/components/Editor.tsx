@@ -262,11 +262,18 @@ const Editor: React.FC<EditorProps> = ({
     };
 
     const handleContactChange = (type: 'directorContact' | 'assistantDirectorContact', field: keyof ContactInfo, value: string) => {
+        let newValue = value;
+        if (field === 'phone') {
+            const numbers = value.replace(/[^\d]/g, '');
+            if (numbers.length === 11) {
+                newValue = `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7)}`;
+            }
+        }
         updateCurrentDay(day => ({
             ...day,
             footerInfo: {
                 ...day.footerInfo,
-                [type]: { ...day.footerInfo[type], [field]: value }
+                [type]: { ...day.footerInfo[type], [field]: newValue }
             }
         }));
     };
@@ -631,8 +638,7 @@ const Editor: React.FC<EditorProps> = ({
                                             <div className="col-span-4 sm:col-span-2">
                                                 <label className="block text-sm font-bold mb-2">S#</label>
                                                 <input
-                                                    type="number"
-                                                    step="0.1"
+                                                    type="text"
                                                     value={row.sceneNumber}
                                                     onChange={(e) => handleRowChange(row.id, 'sceneNumber', e.target.value)}
                                                     className="w-full border p-3 rounded text-base"

@@ -10,25 +10,7 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
     const { headerInfo, scheduleRows, footerInfo } = dayData;
     const { castMaster } = projectData;
 
-    // Helper to render empty row
-    const renderEmptyRow = (key: string) => (
-        <tr key={key} className="h-6">
-            <td className="border border-black px-1 py-1"></td>
-            <td className="border border-black px-1 py-1"></td>
-            <td className="border border-black px-1 py-1"></td>
-            <td className="border border-black px-1 py-1"></td>
-            <td className="border border-black px-1 py-1"></td>
-            <td className="border border-black px-1 py-1"></td>
-            {/* Cast Columns */}
-            {castMaster.map((cast) => (
-                <td key={cast.id} className="border border-black px-1 py-1"></td>
-            ))}
-            {/* Empty Column between Cast and EX */}
-            <td className="border border-black px-1 py-1 bg-gray-100 print:bg-white w-2"></td>
-            {/* EX Column */}
-            <td className="border border-black px-1 py-1"></td>
-        </tr>
-    );
+
 
     // Helper to format footer cast name with newline
     const formatFooterCast = (name: string) => {
@@ -45,16 +27,14 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
         return name;
     };
 
-    const displayTitle = projectData.title.startsWith('「') && projectData.title.endsWith('」')
-        ? projectData.title
-        : `「${projectData.title}」`;
+    const displayTitle = projectData.title;
 
     const displayGroupName = projectData.groupName
         ? (projectData.groupName.endsWith('組') ? projectData.groupName : `${projectData.groupName}組`)
         : '';
 
     // Calculate dynamic column widths
-    const fixedWidth = 12 + 6 + 4 + 4 + 2 + 4; // Time(12) + S#(6) + P(4) + D/N(4) + Spacer(2) + EX(4)
+    const fixedWidth = 12 + 6 + 4 + 4 + 4; // Time(12) + S#(6) + P(4) + D/N(4) + EX(4)
     const castWidthPerCol = 5;
     const totalCastWidth = castMaster.length * castWidthPerCol;
     const availableWidth = 100 - fixedWidth - totalCastWidth;
@@ -110,27 +90,22 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                         <th className="border border-black px-1 py-1 w-[4%]">P</th>
                         <th className="border border-black px-1 py-1 w-[4%]">D/N</th>
                         <th className="border border-black px-1 py-1" style={{ width: `${sceneWidth}%` }}>SCENE</th>
-                        <th className="border border-black px-1 py-1" style={{ width: `${remarksWidth}%` }}>備考</th>
-                        {castMaster.map((cast) => (
-                            <th key={cast.id} className="border border-black px-1 py-1 text-[10px]" style={{ width: `${castWidthPerCol}%` }}>
+                        {castMaster.map((cast, index) => (
+                            <th key={cast.id} className={`border border-black px-1 py-1 text-[10px] ${index === 0 ? 'border-l-4' : ''}`} style={{ width: `${castWidthPerCol}%` }}>
                                 {cast.role}
                             </th>
                         ))}
-                        {/* Empty Column Header */}
-                        <th className="border border-black px-1 py-1 w-2 bg-gray-100 print:bg-gray-200"></th>
-                        <th className="border border-black px-1 py-1 w-[4%] text-[10px]">EX</th>
+                        <th className="border border-black px-1 py-1 w-[4%] text-[10px] border-r-4">EX</th>
+                        <th className="border border-black px-1 py-1" style={{ width: `${remarksWidth}%` }}>備考</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Always show empty row at top */}
-                    {renderEmptyRow('top-empty')}
-
                     {scheduleRows.reduce<{ rows: React.ReactNode[], locationCount: number }>((acc, row) => {
                         if (row.type === 'location') {
                             acc.locationCount++;
                             acc.rows.push(
                                 <tr key={row.id} className="bg-gray-200 print:bg-gray-200 font-bold">
-                                    <td colSpan={7 + castMaster.length + 2} className="border border-black px-2 py-1 text-left">
+                                    <td colSpan={7 + castMaster.length} className="border border-black px-2 py-1 text-left">
                                         第{acc.locationCount}現場：{row.location}
                                     </td>
                                 </tr>
@@ -149,23 +124,21 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                                     <td className="border border-black px-1 py-1 text-center h-8 font-bold">
                                         {row.startTime} - {row.endTime}
                                     </td>
-                                    <td className="border border-black px-1 py-1 text-center font-bold text-lg"></td>
-                                    <td className="border border-black px-1 py-1 text-center font-bold text-lg"></td>
+                                    <td className="border border-black px-1 py-1 text-center font-bold text-sm"></td>
+                                    <td className="border border-black px-1 py-1 text-center font-bold text-sm"></td>
                                     <td className="border border-black px-1 py-1 text-center"></td>
                                     <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top font-bold">
                                         {fullText ? `＜${fullText}＞` : ''}
                                     </td>
+                                    {/* Cast Columns */}
+                                    {castMaster.map((cast, index) => (
+                                        <td key={cast.id} className={`border border-black px-1 py-1 text-center text-lg align-middle ${index === 0 ? 'border-l-4' : ''}`}></td>
+                                    ))}
+                                    {/* EX Column */}
+                                    <td className="border border-black px-1 py-1 text-center text-lg align-middle border-r-4"></td>
                                     <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-xs">
                                         {row.remarks}
                                     </td>
-                                    {/* Cast Columns */}
-                                    {castMaster.map((cast) => (
-                                        <td key={cast.id} className="border border-black px-1 py-1 text-center text-lg align-middle"></td>
-                                    ))}
-                                    {/* Empty Column */}
-                                    <td className="border border-black px-1 py-1 bg-gray-100 print:bg-white w-2"></td>
-                                    {/* EX Column */}
-                                    <td className="border border-black px-1 py-1 text-center text-lg align-middle"></td>
                                 </tr>
                             );
                             return acc;
@@ -177,26 +150,24 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                                 <td className="border border-black px-1 py-1 text-center h-8 font-bold">
                                     {row.startTime} - {row.endTime}
                                 </td>
-                                <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.sceneNumber}</td>
-                                <td className="border border-black px-1 py-1 text-center font-bold text-lg">{row.pageNumber}</td>
+                                <td className="border border-black px-1 py-1 text-center font-bold text-sm">{row.sceneNumber}</td>
+                                <td className="border border-black px-1 py-1 text-center font-bold text-sm">{row.pageNumber}</td>
                                 <td className="border border-black px-1 py-1 text-center">{row.dn}</td>
                                 <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top">
                                     {row.description}
                                 </td>
-                                <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-xs">
-                                    {row.remarks}
-                                </td>
                                 {/* Cast Columns */}
-                                {castMaster.map((cast) => (
-                                    <td key={cast.id} className="border border-black px-1 py-1 text-center text-lg align-middle">
+                                {castMaster.map((cast, index) => (
+                                    <td key={cast.id} className={`border border-black px-1 py-1 text-center text-lg align-middle ${index === 0 ? 'border-l-4' : ''}`}>
                                         {row.castIds.includes(cast.id) ? '○' : ''}
                                     </td>
                                 ))}
-                                {/* Empty Column */}
-                                <td className="border border-black px-1 py-1 bg-gray-100 print:bg-white w-2"></td>
                                 {/* EX Column */}
-                                <td className="border border-black px-1 py-1 text-center text-lg align-middle">
+                                <td className="border border-black px-1 py-1 text-center text-lg align-middle border-r-4">
                                     {row.castIds.includes('EX') ? '○' : ''}
+                                </td>
+                                <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-xs">
+                                    {row.remarks}
                                 </td>
                             </tr>
                         );
@@ -206,14 +177,11 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                     {/* Last Day Message */}
                     {dayData.isLastDay && dayData.lastDayMessage && (
                         <tr>
-                            <td colSpan={7 + castMaster.length + 2} className="border border-black px-2 py-4 text-center font-bold text-lg">
+                            <td colSpan={7 + castMaster.length} className="border border-black px-2 py-4 text-center font-bold text-lg">
                                 {dayData.lastDayMessage}
                             </td>
                         </tr>
                     )}
-
-                    {/* Always show empty row at bottom */}
-                    {renderEmptyRow('bottom-empty')}
                 </tbody>
             </table>
 

@@ -132,7 +132,7 @@ function App() {
         </div>
 
         <div className="flex justify-between items-center no-print flex-wrap gap-2">
-          <h1 className="text-2xl font-bold text-gray-800">なっちゃって香盤表ジェネレーター (ベータ版)</h1>
+          <h1 className="text-2xl font-bold text-gray-800">日スケジェネ (ベータ版)</h1>
           <div className="flex gap-2">
             <label className="bg-[#8c1822] hover:bg-[#70131b] text-white font-bold py-2 px-4 rounded shadow transition cursor-pointer">
               読込
@@ -169,7 +169,7 @@ function App() {
 
           <div className="bg-white p-0 lg:p-6 rounded-lg shadow-md lg:overflow-y-auto lg:max-h-[calc(100vh-100px)] print:shadow-none print:p-0 print:overflow-visible print:max-h-none print:w-full print:hidden">
             <div className="no-print mb-4 text-sm text-gray-500">
-              ※ 右側（モバイルでは下）はプレビューです。印刷時はこの部分のみが出力されます。
+              印刷プレビュー。モバイル端末の場合、画面を横にしないと正常に表示されませんが印刷には影響ございません。
             </div>
             {currentDay && (
               <Preview
