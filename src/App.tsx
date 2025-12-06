@@ -15,7 +15,7 @@ const defaultFooterInfo: FooterInfo = {
   remarks: '',
   vehicles: '',
   extras: '',
-  timeTable: Array(4).fill({
+  timeTable: Array(1).fill({
     time: '',
     location: '',
     cast1: '',
@@ -139,7 +139,7 @@ function App() {
         </div>
 
         <div className="flex justify-between items-center no-print flex-wrap gap-2">
-          <h1 className="text-2xl font-bold text-gray-800">日スケジェネ (ベータ版)</h1>
+          <h1 className="text-2xl font-bold text-gray-800">スケジェネ (ベータ版)</h1>
           <div className="flex gap-2">
             <label className="bg-[#8c1822] hover:bg-[#70131b] text-white font-bold py-2 px-4 rounded shadow transition cursor-pointer">
               読込

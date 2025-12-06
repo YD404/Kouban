@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ProjectData, DayData, SceneRow, LocationRow, BreakRow, CastMaster, ContactInfo } from '../types.ts';
 
 interface EditorProps {
@@ -24,6 +24,17 @@ const Editor: React.FC<EditorProps> = ({
     const toggleSection = (section: 'basic' | 'schedule' | 'footer') => {
         setActiveSection(activeSection === section ? 'basic' : section);
     };
+
+    // Scroll to top when section changes
+    useEffect(() => {
+        // Try to find the scrollable container in desktop view
+        const scrollContainer = document.querySelector('.lg\\:overflow-y-auto');
+        if (scrollContainer) {
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // Also scroll window for mobile
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [activeSection]);
 
     // --- Project Level Handlers ---
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,12 +115,21 @@ const Editor: React.FC<EditorProps> = ({
 
     // --- Schedule Handlers ---
     const addSceneRow = () => {
-        const lastRow = currentDay.scheduleRows[currentDay.scheduleRows.length - 1];
+        // Find last row that has an endTime (scene or break)
+        let lastEndTimeRow = null;
+        for (let i = currentDay.scheduleRows.length - 1; i >= 0; i--) {
+            const row = currentDay.scheduleRows[i];
+            if (row.type === 'scene' || row.type === 'break') {
+                lastEndTimeRow = row;
+                break;
+            }
+        }
+
         let initialStartTime = '';
 
-        if (lastRow && lastRow.type === 'scene') {
-            initialStartTime = lastRow.endTime;
-        } else if (currentDay.scheduleRows.length === 0 && currentDay.headerInfo.meetingTime) {
+        if (lastEndTimeRow) {
+            initialStartTime = lastEndTimeRow.endTime;
+        } else if (currentDay.headerInfo.meetingTime) {
             const [h, m] = currentDay.headerInfo.meetingTime.split(':').map(Number);
             if (!isNaN(h) && !isNaN(m)) {
                 const date = new Date();
@@ -136,13 +156,20 @@ const Editor: React.FC<EditorProps> = ({
     };
 
     const addBreakRow = () => {
-        const lastRow = currentDay.scheduleRows[currentDay.scheduleRows.length - 1];
+        // Find last row that has an endTime (scene or break)
+        let lastEndTimeRow = null;
+        for (let i = currentDay.scheduleRows.length - 1; i >= 0; i--) {
+            const row = currentDay.scheduleRows[i];
+            if (row.type === 'scene' || row.type === 'break') {
+                lastEndTimeRow = row;
+                break;
+            }
+        }
+
         let initialStartTime = '';
 
-        if (lastRow) {
-            if (lastRow.type === 'scene' || lastRow.type === 'break') {
-                initialStartTime = lastRow.endTime;
-            }
+        if (lastEndTimeRow) {
+            initialStartTime = lastEndTimeRow.endTime;
         } else if (currentDay.headerInfo.meetingTime) {
             const [h, m] = currentDay.headerInfo.meetingTime.split(':').map(Number);
             if (!isNaN(h) && !isNaN(m)) {
@@ -258,6 +285,23 @@ const Editor: React.FC<EditorProps> = ({
     const handleTimeTableChange = (index: number, field: string, value: string) => {
         const newTimeTable = [...currentDay.footerInfo.timeTable];
         newTimeTable[index] = { ...newTimeTable[index], [field]: value };
+        handleFooterChange('timeTable', newTimeTable);
+    };
+
+    const handleAddTimeTableRow = () => {
+        const newRow = {
+            time: '',
+            location: '',
+            cast1: '',
+            cast2: '',
+            cast3: '',
+            remarks: '',
+        };
+        handleFooterChange('timeTable', [...currentDay.footerInfo.timeTable, newRow]);
+    };
+
+    const handleDeleteTimeTableRow = (index: number) => {
+        const newTimeTable = currentDay.footerInfo.timeTable.filter((_, i) => i !== index);
         handleFooterChange('timeTable', newTimeTable);
     };
 
@@ -815,8 +859,17 @@ const Editor: React.FC<EditorProps> = ({
                             <h3 className="font-bold mb-4 text-lg">入り時間・キャスト表</h3>
                             <div className="space-y-6">
                                 {currentDay.footerInfo.timeTable.map((row, index) => (
-                                    <div key={index} className="bg-gray-50 p-4 rounded shadow-sm">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                    <div key={index} className="bg-gray-50 p-4 rounded shadow-sm relative">
+                                        <div className="absolute top-2 right-2">
+                                            <button
+                                                onClick={() => handleDeleteTimeTableRow(index)}
+                                                className="text-red-500 hover:text-red-700 p-2"
+                                                title="行を削除"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 pr-8">
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="time"
@@ -830,16 +883,30 @@ const Editor: React.FC<EditorProps> = ({
                                                     className="bg-gray-200 hover:bg-gray-300 text-gray-600 rounded p-3 font-bold"
                                                     title="時間をクリア"
                                                 >
-                                                    ×
+                                                    クリア
                                                 </button>
                                             </div>
-                                            <input
-                                                type="text"
-                                                placeholder="場所"
-                                                value={row.location}
-                                                onChange={(e) => handleTimeTableChange(index, 'location', e.target.value)}
-                                                className="border p-3 rounded w-full text-base"
-                                            />
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="場所"
+                                                    value={row.location}
+                                                    onChange={(e) => handleTimeTableChange(index, 'location', e.target.value)}
+                                                    className="border p-3 rounded w-full text-base"
+                                                />
+                                                {index > 0 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            const prevRow = currentDay.footerInfo.timeTable[index - 1];
+                                                            handleTimeTableChange(index, 'location', prevRow.location);
+                                                        }}
+                                                        className="bg-gray-200 hover:bg-gray-300 text-gray-600 rounded p-3 font-bold whitespace-nowrap"
+                                                        title="上の行と同じ場所を入力"
+                                                    >
+                                                        同上
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                                             <select
@@ -876,6 +943,12 @@ const Editor: React.FC<EditorProps> = ({
                                         />
                                     </div>
                                 ))}
+                                <button
+                                    onClick={handleAddTimeTableRow}
+                                    className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 font-bold text-base"
+                                >
+                                    + 行を追加
+                                </button>
                             </div>
                         </div>
 
@@ -919,10 +992,20 @@ const Editor: React.FC<EditorProps> = ({
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                        {/* Print Button */}
+                        <div className="mt-8 text-right">
+                            <button
+                                onClick={() => window.print()}
+                                className="bg-[#32353d] hover:bg-[#1f2126] text-white font-bold py-3 px-6 rounded shadow transition text-base"
+                            >
+                                印刷 / PDF保存
+                            </button>
+                        </div>
+                    </div >
                 )}
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

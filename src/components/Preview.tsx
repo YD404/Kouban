@@ -214,13 +214,69 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {footerInfo.timeTable.map((row, index) => {
+                    {footerInfo.timeTable.map((row, index, arr) => {
                         const heightClass = row.time ? 'h-6' : 'h-3';
                         const paddingClass = row.time ? 'py-1' : 'py-0';
+
+                        // Calculate rowSpan for Time
+                        let timeRowSpan = 1;
+                        if (row.time && row.time !== '') {
+                            if (index > 0 && arr[index - 1].time === row.time) {
+                                timeRowSpan = 0;
+                            } else {
+                                for (let i = index + 1; i < arr.length; i++) {
+                                    if (arr[i].time === row.time) {
+                                        timeRowSpan++;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Calculate rowSpan for Location
+                        // Merge only if Time is same AND Location is same
+                        let locationRowSpan = 1;
+                        const isSameTimeAsPrev = index > 0 && arr[index - 1].time === row.time;
+                        const isSameLocationAsPrev = index > 0 && arr[index - 1].location === row.location;
+
+                        // If time is empty, we generally don't merge, or simple merge? 
+                        // Requirement says "if time is also same". Assuming non-empty time for strict merging usually.
+                        // But let's follow the logic: If current row has same time as prev AND same location as prev, hide it.
+
+                        if (row.time && row.time !== '') {
+                            if (isSameTimeAsPrev && isSameLocationAsPrev) {
+                                locationRowSpan = 0;
+                            } else {
+                                // Count how many next rows have same time AND same location
+                                for (let i = index + 1; i < arr.length; i++) {
+                                    if (arr[i].time === row.time && arr[i].location === row.location) {
+                                        locationRowSpan++;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         return (
                             <tr key={index}>
-                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center`}>{row.time}</td>
-                                <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center`}>{row.location}</td>
+                                {timeRowSpan > 0 && (
+                                    <td
+                                        className={`border border-black px-1 ${paddingClass} ${heightClass} text-center align-middle`}
+                                        rowSpan={timeRowSpan}
+                                    >
+                                        {row.time}
+                                    </td>
+                                )}
+                                {locationRowSpan > 0 && (
+                                    <td
+                                        className={`border border-black px-1 ${paddingClass} ${heightClass} text-center align-middle`}
+                                        rowSpan={locationRowSpan}
+                                    >
+                                        {row.location}
+                                    </td>
+                                )}
                                 <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[11%] text-[10px] leading-tight`}>{formatFooterCast(row.cast1)}</td>
                                 <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[12%] text-[10px] leading-tight`}>{formatFooterCast(row.cast2)}</td>
                                 <td className={`border border-black px-1 ${paddingClass} ${heightClass} text-center w-[12%] text-[10px] leading-tight`}>{formatFooterCast(row.cast3)}</td>
@@ -242,6 +298,8 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                     {footerInfo.assistantDirectorContact.name} <span className="ml-2 text-sm font-bold">{footerInfo.assistantDirectorContact.phone}</span>
                 </div>
             </div>
+
+
         </div>
     );
 };
