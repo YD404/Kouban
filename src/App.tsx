@@ -39,7 +39,7 @@ const createNewDay = (id: string): DayData => ({
 const defaultProjectData: ProjectData = {
   title: '撮影香盤表',
   groupName: '',
-  castMaster: [{ id: '1', role: '役名', name: '田中或剛' }],
+  castMaster: [{ id: '1', role: '', name: '' }],
   days: [createNewDay(crypto.randomUUID())],
 };
 

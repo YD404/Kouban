@@ -512,7 +512,7 @@ const Editor: React.FC<EditorProps> = ({
                                 ))}
                                 <button
                                     onClick={handleAddCast}
-                                    className="text-blue-600 hover:text-blue-800 text-base font-bold p-2"
+                                    className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 font-bold text-base"
                                 >
                                     + キャストを追加
                                 </button>
