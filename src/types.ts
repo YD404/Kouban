@@ -21,6 +21,7 @@ export interface SceneRow extends BaseRow {
   description: string;
   remarks?: string; // 備考
   castIds: string[]; // チェックされたCastMasterのIDリスト
+  upCastIds: string[]; // UP(撮影終了)のCastMasterのIDリスト
 }
 
 // 場所行

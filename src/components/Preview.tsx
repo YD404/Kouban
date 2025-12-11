@@ -171,6 +171,29 @@ const Preview: React.FC<PreviewProps> = ({ projectData, dayData }) => {
                                 </td>
                             </tr>
                         );
+
+                        // Check for UP casts
+                        if (row.upCastIds && row.upCastIds.length > 0) {
+                            acc.rows.push(
+                                <tr key={`${row.id}-up`}>
+                                    <td className="border border-black px-1 py-1 text-center h-8 font-bold"></td>
+                                    <td className="border border-black px-1 py-1 text-center font-bold text-sm"></td>
+                                    <td className="border border-black px-1 py-1 text-center font-bold text-sm"></td>
+                                    <td className="border border-black px-1 py-1 text-center"></td>
+                                    <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top"></td>
+                                    {/* Cast Columns */}
+                                    {castMaster.map((cast, index) => (
+                                        <td key={cast.id} className={`border border-black px-1 py-1 text-center text-lg align-middle font-bold ${index === 0 ? 'border-l-4' : ''}`}>
+                                            {row.upCastIds?.includes(cast.id) ? 'UP' : ''}
+                                        </td>
+                                    ))}
+                                    {/* EX Column */}
+                                    <td className="border border-black px-1 py-1 text-center text-lg align-middle border-r-4"></td>
+                                    <td className="border border-black px-1 py-1 text-left whitespace-pre-wrap align-top text-xs"></td>
+                                </tr>
+                            );
+                        }
+
                         return acc;
                     }, { rows: [], locationCount: 0 }).rows}
 

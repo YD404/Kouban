@@ -63,6 +63,14 @@ const Editor: React.FC<EditorProps> = ({
             days: [...prev.days, newDay]
         }));
         setCurrentDayId(newId);
+        setActiveSection('basic');
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const scrollContainer = document.querySelector('.lg\\:overflow-y-auto');
+        if (scrollContainer) {
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     const handleDaySelect = (id: string) => {
@@ -148,6 +156,7 @@ const Editor: React.FC<EditorProps> = ({
             dn: 'D',
             description: '',
             castIds: [],
+            upCastIds: [],
         };
         updateCurrentDay(day => ({
             ...day,
@@ -253,6 +262,20 @@ const Editor: React.FC<EditorProps> = ({
                     ? row.castIds.filter((id) => id !== castId)
                     : [...row.castIds, castId];
                 return { ...row, castIds: newCastIds };
+            })
+        }));
+    };
+
+    const handleUpCastSelection = (rowId: string, castId: string) => {
+        updateCurrentDay(day => ({
+            ...day,
+            scheduleRows: day.scheduleRows.map((row) => {
+                if (row.id !== rowId || row.type !== 'scene') return row;
+                const currentUpCastIds = row.upCastIds || [];
+                const newUpCastIds = currentUpCastIds.includes(castId)
+                    ? currentUpCastIds.filter((id) => id !== castId)
+                    : [...currentUpCastIds, castId];
+                return { ...row, upCastIds: newUpCastIds };
             })
         }));
     };
@@ -733,15 +756,28 @@ const Editor: React.FC<EditorProps> = ({
                                                 <label className="block text-sm font-bold mb-2">出演</label>
                                                 <div className="flex flex-wrap gap-3">
                                                     {projectData.castMaster.map((cast) => (
-                                                        <label key={cast.id} className="flex items-center gap-2 bg-white px-3 py-2 rounded border cursor-pointer hover:bg-blue-50">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={row.castIds.includes(cast.id)}
-                                                                onChange={() => handleCastSelection(row.id, cast.id)}
-                                                                className="w-5 h-5"
-                                                            />
-                                                            <span className="text-base">{cast.role}</span>
-                                                        </label>
+                                                        <div key={cast.id} className="flex items-center gap-1 bg-white px-3 py-2 rounded border hover:bg-blue-50">
+                                                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={row.castIds.includes(cast.id)}
+                                                                    onChange={() => handleCastSelection(row.id, cast.id)}
+                                                                    className="w-5 h-5"
+                                                                />
+                                                                <span className="text-base">{cast.role}</span>
+                                                            </label>
+                                                            {row.castIds.includes(cast.id) && (
+                                                                <label className="flex items-center gap-1 cursor-pointer ml-2 border-l pl-2 select-none" title={`${cast.role} UP`}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={row.upCastIds?.includes(cast.id)}
+                                                                        onChange={() => handleUpCastSelection(row.id, cast.id)}
+                                                                        className="w-4 h-4 accent-red-600"
+                                                                    />
+                                                                    <span className="text-xs font-bold text-red-600">UP</span>
+                                                                </label>
+                                                            )}
+                                                        </div>
                                                     ))}
                                                     <label className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded border border-yellow-200 cursor-pointer hover:bg-yellow-100 ml-auto">
                                                         <input
@@ -994,7 +1030,13 @@ const Editor: React.FC<EditorProps> = ({
                         </div>
 
                         {/* Print Button */}
-                        <div className="mt-8 text-right">
+                        <div className="mt-8 flex justify-end gap-4">
+                            <button
+                                onClick={handleAddDay}
+                                className="bg-[#32353d] hover:bg-[#1f2126] text-white font-bold py-3 px-6 rounded shadow transition text-base"
+                            >
+                                + 日付追加
+                            </button>
                             <button
                                 onClick={() => window.print()}
                                 className="bg-[#32353d] hover:bg-[#1f2126] text-white font-bold py-3 px-6 rounded shadow transition text-base"
