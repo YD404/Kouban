@@ -1041,7 +1041,7 @@ const Editor: React.FC<EditorProps> = ({
                                 onClick={() => window.print()}
                                 className="bg-[#32353d] hover:bg-[#1f2126] text-white font-bold py-3 px-6 rounded shadow transition text-base"
                             >
-                                印刷 / PDF保存
+                                印刷 / PDF
                             </button>
                         </div>
                     </div >
