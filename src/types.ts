@@ -21,7 +21,7 @@ export interface SceneRow extends BaseRow {
   description: string;
   remarks?: string; // 備考
   castIds: string[]; // チェックされたCastMasterのIDリスト
-  upCastIds: string[]; // UP(撮影終了)のCastMasterのIDリスト
+  upCastIds?: string[]; // UP(撮影終了)のCastMasterのIDリスト (optional)
 }
 
 // 場所行
@@ -55,20 +55,23 @@ export interface ContactInfo {
   phone: string;
 }
 
+// タイムテーブル行
+export interface TimeTableRow {
+  time: string;
+  location: string;
+  cast1: string;
+  cast2: string;
+  cast3: string;
+  remarks: string;
+}
+
 export interface FooterInfo {
   remarks: string; // 備考
   vehicles: string; // 車両等
   extras: string; // エキストラ
 
   // セクションB: 入り時間・キャスト表
-  timeTable: {
-    time: string;
-    location: string;
-    cast1: string;
-    cast2: string;
-    cast3: string;
-    remarks: string;
-  }[];
+  timeTable: TimeTableRow[];
 
   // セクションC
   directorContact: ContactInfo;
