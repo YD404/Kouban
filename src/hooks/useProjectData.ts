@@ -167,7 +167,7 @@ export function useProjectData() {
         return '';
     }, [currentDay]);
 
-    const addSceneRow = useCallback(() => {
+    const addSceneRow = useCallback((index?: number) => {
         const initialStartTime = getLastEndTime();
         const newRow: SceneRow = {
             id: generateId(),
@@ -181,13 +181,18 @@ export function useProjectData() {
             castIds: [],
             upCastIds: [],
         };
-        updateCurrentDay(day => ({
-            ...day,
-            scheduleRows: [...day.scheduleRows, newRow]
-        }));
+        updateCurrentDay(day => {
+            const newRows = [...day.scheduleRows];
+            if (index !== undefined && index >= 0 && index <= newRows.length) {
+                newRows.splice(index, 0, newRow);
+            } else {
+                newRows.push(newRow);
+            }
+            return { ...day, scheduleRows: newRows };
+        });
     }, [getLastEndTime, updateCurrentDay]);
 
-    const addBreakRow = useCallback(() => {
+    const addBreakRow = useCallback((index?: number) => {
         const initialStartTime = getLastEndTime();
         const initialEndTime = initialStartTime ? addHoursToTime(initialStartTime, 1) : '';
 
@@ -199,22 +204,32 @@ export function useProjectData() {
             selectedOptions: [],
             otherText: '',
         };
-        updateCurrentDay(day => ({
-            ...day,
-            scheduleRows: [...day.scheduleRows, newRow]
-        }));
+        updateCurrentDay(day => {
+            const newRows = [...day.scheduleRows];
+            if (index !== undefined && index >= 0 && index <= newRows.length) {
+                newRows.splice(index, 0, newRow);
+            } else {
+                newRows.push(newRow);
+            }
+            return { ...day, scheduleRows: newRows };
+        });
     }, [getLastEndTime, updateCurrentDay]);
 
-    const addLocationRow = useCallback(() => {
+    const addLocationRow = useCallback((index?: number) => {
         const newRow: LocationRow = {
             id: generateId(),
             type: 'location',
             location: '',
         };
-        updateCurrentDay(day => ({
-            ...day,
-            scheduleRows: [...day.scheduleRows, newRow]
-        }));
+        updateCurrentDay(day => {
+            const newRows = [...day.scheduleRows];
+            if (index !== undefined && index >= 0 && index <= newRows.length) {
+                newRows.splice(index, 0, newRow);
+            } else {
+                newRows.push(newRow);
+            }
+            return { ...day, scheduleRows: newRows };
+        });
     }, [updateCurrentDay]);
 
     const updateRow = useCallback((id: string, field: string, value: unknown) => {
